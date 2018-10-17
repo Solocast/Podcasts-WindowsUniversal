@@ -19,15 +19,18 @@ namespace Solocast.Tests
         [TestMethod]
         public void RandomTest()
         {
+            //Arrange
             var feedParser = new FeedParserService();
+            //Act
             var podcast = feedParser.GetPodcastAsync("http://monstercat.com/podcast/feed.xml").Result;
-
+            //Assert
             Assert.AreEqual(true, true);
         }
 
         [TestMethod]
         public void TestLocalStorage()
         {
+            //Arrange
             var localStorage = new LocalPodcastService("podcasts.json");
             var feedParser = new FeedParserService();
             var podcastService = new PodcastService(feedParser, localStorage, null);
@@ -37,8 +40,11 @@ namespace Solocast.Tests
             podcasts.Add(podcast);
 
             podcastService.SavePodcastsAsync(podcasts).Wait();
-
+           
+            //Act
             var podcastsFromStorage = podcastService.GetPodcastsAsync().Result.ToList();
+            
+            //Assert
             Assert.AreEqual(podcasts.Count, podcastsFromStorage.Count);
 
             for (int i = 0; i < podcasts.Count; i++)
@@ -50,6 +56,7 @@ namespace Solocast.Tests
         [TestMethod]
         public void TestSQLiteStorage()
         {
+            //Arrange
             var sqliteStorage = new SQLitePodcastService();
             sqliteStorage.Migrate();
             var feedParser = new FeedParserService();
@@ -61,8 +68,11 @@ namespace Solocast.Tests
 
             podcastService.SavePodcastAsync(podcast).Wait();
             podcastService.SavePodcastsAsync(podcasts).Wait();
-
+            
+            //Act
             var podcastsFromStorage = podcastService.GetPodcastsAsync().Result.ToList();
+            
+            //Assert
             Assert.AreEqual(podcasts.Count, podcastsFromStorage.Count);
 
             for (int i = 0; i < podcasts.Count; i++)
@@ -74,12 +84,16 @@ namespace Solocast.Tests
         [TestMethod]
         public void TestDownload()
         {
+            //Arrange
             var localStorage = new LocalPodcastService("podcasts.json");
             var feedParser = new FeedParserService();
             var fileManager = new FileDownloadService();
             var podcastService = new PodcastService(feedParser, localStorage, fileManager);
 
+            //Act
             var podcastFromService = podcastService.GetPodcastAsync("http://monstercat.com/podcast/feed.xml").Result;
+            
+            //Assert
             podcastService.DownloadEpisodeAsync(podcastFromService.Episodes.OrderByDescending(e => e.Published).ToList()[0]).Wait();
         }
 
@@ -87,9 +101,9 @@ namespace Solocast.Tests
         public void Cleanup()
         {
             try
-            {
+            {         
                 var localFolder = ApplicationData.Current.LocalFolder;
-                var file = localFolder.GetFileAsync("podcast.json").AsTask().Result;
+                var file = localFolder.GetFileAsync("podcast.json").AsTask().Result;                
                 file.DeleteAsync().AsTask().Wait();
             }
             catch
